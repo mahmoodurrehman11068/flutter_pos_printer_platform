@@ -1,3 +1,7 @@
+## 1.2.1+gearchain.1
+
+* Guard lateinit `bluetoothService`/`adapter`/`channel` access in `onDetachedFromEngine` to prevent UninitializedPropertyAccessException crashing the host app when the engine detaches without a completed attach.
+
 ## 1.1.0
 
 * Toast msgs english locale default

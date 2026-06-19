@@ -157,15 +157,26 @@ class FlutterPosPrinterPlatformPlugin : FlutterPlugin, MethodCallHandler, Plugin
     }
 
     override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
-        channel.setMethodCallHandler(null)
+        if (this::channel.isInitialized) {
+            channel.setMethodCallHandler(null)
+        }
         messageChannel?.setStreamHandler(null)
         messageUSBChannel?.setStreamHandler(null)
 
         messageChannel = null
         messageUSBChannel = null
 
-        bluetoothService.setHandler(null)
-        adapter.setHandler(null)
+        // Guard the lateinit accesses: onDetachedFromEngine can run on a plugin
+        // instance whose onAttachedToEngine never completed (e.g. a background
+        // FlutterEngine), in which case these properties are uninitialized and
+        // accessing them throws UninitializedPropertyAccessException, crashing
+        // the host app. Mirror the isInitialized guard already used elsewhere.
+        if (this::bluetoothService.isInitialized) {
+            bluetoothService.setHandler(null)
+        }
+        if (this::adapter.isInitialized) {
+            adapter.setHandler(null)
+        }
     }
 
     override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
